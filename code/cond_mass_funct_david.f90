@@ -13,15 +13,17 @@ program cond_mass_funct_david
   use precision  
   implicit none
   
-  ! frequently used parameters are found in this header file:
-  include './cubep3m_200213_8_4096_100Mpc_ext2_pencil/workdir/parameters'
 
   !list of redshift to generate slices for 
-  character(len=*),parameter :: checkpoints='./checkpoints_halos' 
+
+  character(len=*),parameter :: checkpoints='./../checkpoints_halos' 
 
   !cosmology
   real*8,parameter :: omegabh2=0.0219961,omega0=0.318,lambda0=0.682,h=0.678&
        & ,an=0.9611,tcmb=2.726,s8=0.833 
+
+  ! frequently used parameters are found in this header file:
+  include '/research/prace5/shared/iti20/IDM/cubep3m_200213_8_4096_100Mpc_ext2_pencil/workdir/parameters'
 
   real*8 :: mass0, m_grid, m_min, m_max, m_box
   real*8 :: rho_crit_0, rho_crit_z, rho_crit_0_MpcM_sun, rho_bar, rho_bar_cgs
@@ -30,11 +32,11 @@ program cond_mass_funct_david
 
   ! Halo mass binning
 
-  real(kind=4), parameter :: lM_min = 8  ! (log10) minimum halo
+  real(kind=4), parameter :: lM_min = 9  ! (log10) minimum halo
   ! mass for binning
-  real(kind=4), parameter :: lM_max = 12  ! (log10) maximum halo
+  real(kind=4), parameter :: lM_max = 9.4 ! (log10) maximum halo
   ! mass for binning. Just a single bin for all halos above M_max
-  real(kind=4), parameter :: n_bin = 8     ! total number of mass
+  real(kind=4), parameter :: n_bin = 2     ! total number of mass
   ! bins; 0.5= mass bin size (in log10)
   real(kind=4) :: mms(n_bin+1)  
 
@@ -178,17 +180,16 @@ program cond_mass_funct_david
   !Loop over checkpoints
 
   do cp=1,num_checkpoints
-
      write(z_s,'(f7.3)') z_checkpoint(cp)
      z_s=adjustl(z_s)
 
-     ofile1='./postprocessing/'//z_s(1:len_trim(z_s)) &
+     ofile1='./../binning/'//z_s(1:len_trim(z_s)) &
           &//'dens'//size_s(1:len_trim(size_s))//'.bin'
-     ofile2='./postprocessing/'//z_s(1:len_trim(z_s)) &
+     ofile2='./../binning/'//z_s(1:len_trim(z_s)) &
           &//'halo_num'//size_s(1:len_trim(size_s))//'.bin'
-     ofile3='./postprocessing/'//z_s(1:len_trim(z_s)) &
+     ofile3='./../binning/'//z_s(1:len_trim(z_s)) &
           &//'halo_mass'//size_s(1:len_trim(size_s))//'.bin'
-     ofile4='./postprocessing/'//z_s(1:len_trim(z_s)) &
+     ofile4='./../binning/'//z_s(1:len_trim(z_s)) &
           &//'coll_frac'//size_s(1:len_trim(size_s))//'.bin'
 
 
@@ -209,8 +210,8 @@ program cond_mass_funct_david
         write(rank_s,'(i4)') rank
         rank_s=adjustl(rank_s)
         !important to use the ntot_all (halos not exluded) file and not the n_all (halos_excluded) file 
-        ifile1='./sph_smooth_cubep3m_200213_8_4096_100Mpc_ext2_pencil/global/so/nc256/'//z_s(1:len_trim(z_s))//'ntot_all.dat'
-        ifile2='./cubep3m_200213_8_4096_100Mpc_ext2_pencil/results/full_halo_catalogues/p/scratch/chpo22/hpo222/cubep3m_200213_8_4096_100Mpc_ext2_pencil/results/'//z_s(1:len_trim(z_s))//'halo.dat'
+        ifile1='/research/prace5/shared/iti20/IDM/sph_smooth_cubep3m_200213_8_4096_100Mpc_ext2_pencil/global/so/nc256/'//z_s(1:len_trim(z_s))//'ntot_all.dat'
+        ifile2='/research/prace5/shared/iti20/IDM/cubep3m_200213_8_4096_100Mpc_ext2_pencil/results/full_halo_catalogues/p/scratch/chpo22/hpo222/cubep3m_200213_8_4096_100Mpc_ext2_pencil/results/'//z_s(1:len_trim(z_s))//'halo.dat'
 
        if (fstat /= 0) then
            write(*,*) 'error opening catalog'
@@ -277,8 +278,8 @@ program cond_mass_funct_david
            
            mass0=halo_mass*M_grid           
 
-           if(mass0<mms(1))then
-              !print*,'Too small halo mass'
+           if((mass0<=10**lM_min).or.(mass0>10**lM_max))then
+              !print*,'Halo mass not within bounds'
            else
               if(mass0>=mms(n_bin+1))then !halo is large, above 10^12
                  ! M_solar
@@ -286,7 +287,6 @@ program cond_mass_funct_david
                       &=coarse_halos(p(1),p(2),p(3),n_bin+1,0)+1
                  coarse_halos(p(1),p(2),p(3),n_bin+1,1) &
                       &=coarse_halos(p(1),p(2),p(3),n_bin+1,1)+mass0
-                 print*,'check ',mass0,mms(1),mms(n_bin+1)
               else !find which mass bin the halo falls in
                  do ii=2,n_bin+1 
                     if(mass0>mms(ii-1).and.mass0<=mms(ii)) then
@@ -355,4 +355,3 @@ program cond_mass_funct_david
   enddo
   
 end program cond_mass_funct_david
-
