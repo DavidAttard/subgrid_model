@@ -9,19 +9,44 @@ from matplotlib.ticker import FormatStrFormatter
 from scipy.interpolate import InterpolatedUnivariateSpline,UnivariateSpline, interp1d
 
 
+min_resolved_mass = 10**9
+
+# Function to ensure each bin has at least min_count values
+def ensure_min_bin_count(bin_edges, data, min_count=10):
+    # Initialize variables
+    new_bin_edges = [bin_edges[0]]  # Start with the first bin edge
+    count_in_bin = 0  # Count of elements in the current bin
+
+    for i in range(1, len(bin_edges)):
+        # Count elements in the current bin
+        count_in_bin += np.sum((data >= bin_edges[i-1]) & (data < bin_edges[i]))
+
+        if count_in_bin >= min_count:  # If bin has enough values
+            new_bin_edges.append(bin_edges[i])  # Close the bin
+            count_in_bin = 0  # Reset count for the next bin
+
+    # If any remaining data is left in the last bin, include the final edge
+    if new_bin_edges[-1] != bin_edges[-1]:
+        new_bin_edges.append(bin_edges[-1])
+
+    return np.array(new_bin_edges)
+
+
 Ncube=256**3
 
-zlist = np.loadtxt('./redshift_matching/matched_z.txt')
+zlist = np.loadtxt('/p/project/lgreion/david/HESTIA_multirealizations/runs/Full_box/37_11/subgrid/HMACH_9_9.4/redshift_matching/matched_z.txt')
 
 zred_HESTIA = zlist[:,0]
 zred_highRes = zlist[:,1]
 # zred=7.570
+print(zred_HESTIA)
+# for j in range(7,len(zred_HESTIA)):
+for j in range(28,len(zred_HESTIA)):
 
-for j in range(len(zred_HESTIA)):
     print('Doing z={:.3f}'.format(zred_HESTIA[j]))
     # Code to extract infor from the high res simulation 4096^3 coarsened to 256^3
     sz = '%.3f' %zred_highRes[j]
-    txt_file = open('./binning/'+sz+'halo_mass256.bin')
+    txt_file = open('/p/project/lgreion/david/HESTIA_multirealizations/subgrid_modelling/HMACH_binning/binning/'+sz+'halo_mass256.bin')
     fcoll = []
     dens = []
 
@@ -40,11 +65,11 @@ for j in range(len(zred_HESTIA)):
     overdense = np.array(dens/np.average(dens))
 
     fcoll = np.array(fcoll)# Code to extract infor from the high res simulation 4096^3 coarsened to 256^3
-
+    min_fcoll = min_resolved_mass/np.array(dens)
 
     # Loading the HESTIA data
-    density_data=np.load('./HESTIA_256/DM_density/dens_cgs_{:.3f}.npy'.format(zred_HESTIA[j])).flatten()
-    print('Loaded: dens_cgs_{:.3f}.npy'.format(zred_HESTIA[j]))
+    density_data=np.load('/p/project/lgreion/david/HESTIA_multirealizations/runs/Full_box/37_11/dens_fields/DM_count_dens/DM_dens_cgs_{:.3f}_1024_256.npy'.format(zred_HESTIA[j])).flatten()
+    print('Loaded: DM_dens_cgs_{:.3f}_1024_256.npy'.format(zred_HESTIA[j]))
 
     # Find the average density
     rho_avg = np.sum(density_data)/Ncube
@@ -56,21 +81,50 @@ for j in range(len(zred_HESTIA)):
     delta_nonzero = delta[fcoll!=0]
     fcoll_nonzero = fcoll[fcoll!=0]
 
-    # Since we are dealing with log-normal distributions we are interested in log(x)
-    log_fcoll = np.log(fcoll_nonzero)
+    # initial_bin_edges = np.arange(-1, 15 + 0.1, 0.1)
+    # initial_bin_edges = np.append(initial_bin_edges, [20,25,30,35,40,50,60,70,80,90,100,120,140,160,180,200,240,260,300])  # Wider bins for larger values
 
-    # Define the bins for overdensities, starting from -1 to 10 with a bin width of 0.1
-    bin_edges = np.arange(-1, 10 + 0.1, 0.1)
-    # For Larger overdensities we have wider bins for sufficient statistics
-    bin_edges = np.append(bin_edges, 15)
-    bin_edges = np.append(bin_edges, 30)
-    bin_edges = np.append(bin_edges, 60)
-    bin_edges = np.append(bin_edges, 80)
-    bin_edges = np.append(bin_edges, 100)
+    # Initial bin edges from -1 to 15 with width 0.1
+    initial_bin_edges = np.arange(-1, 15 + 0.1, 0.1)
+    bins = list(initial_bin_edges)
 
-    bin_edges = np.append(bin_edges, 100)
+    # Define variables for binning delta > 15
+    start_bin = 15
+    current_bin_width = 0.1
+
+    # Sort delta_nonzero values above 15 for efficient processing
+    delta_above_15 = np.sort(delta_nonzero[delta_nonzero > start_bin])
+
+    # Loop to create bins for delta > 15
+    while len(delta_above_15) > 10:
+        # Calculate the end of the current bin
+        next_bin_edge = start_bin + current_bin_width
+        
+        # Count the entries in the current bin
+        count_in_bin = np.sum((delta_above_15 >= start_bin) & (delta_above_15 < next_bin_edge))
+        
+        if count_in_bin >= 10:
+            # If there are at least 10 entries, accept the current bin width
+            bins.append(next_bin_edge)
+            # Remove entries that fall into the current bin
+            delta_above_15 = delta_above_15[delta_above_15 >= next_bin_edge]
+            # Reset start_bin and bin width
+            start_bin = next_bin_edge
+            current_bin_width = 5  # Reset bin width to 0.1 for next bin
+            print(bins)
+            print(len(delta_above_15))
+        else:
+            # If fewer than 10 entries, increase the bin width and try again
+            current_bin_width += 5
+
+    # Convert bins to numpy array for easy use
+    bin_edges = np.array(bins)
 
 
+    # Digitize the data into initial bins
+    bin_indices = np.digitize(delta_nonzero, bins=bin_edges) - 1
+
+    print(bin_edges)
     # Digitize the overdensity values to determine which bin they fall into
     bin_indices = np.digitize(delta_nonzero, bin_edges)
 
@@ -89,7 +143,6 @@ for j in range(len(zred_HESTIA)):
         # Select the collapse fractions & deltas that fall into the current bin
         in_bin_fcoll = fcoll_nonzero[bin_indices == i]
         in_bin_delta = delta_nonzero[bin_indices == i]
-        
         # Compute the mean collapse fraction for this bin
         if len(in_bin_fcoll) > 0:
             
@@ -102,23 +155,14 @@ for j in range(len(zred_HESTIA)):
         
     data = np.column_stack((delta_collapse_per_bin, shape_collapse_per_bin, loc_collapse_per_bin, scale_collapse_per_bin, N_collapse_per_bin, min_collapse_per_bin, max_collapse_per_bin,avg_collapse_per_bin))
 
-    if len(data) == 0:
-        # Assume these are your input arrays
-        delta = overdense-1
-        delta_nonzero = delta[fcoll!=0]
-        fcoll_nonzero = fcoll[fcoll!=0]
+    if len(data) == 0:        
 
-        # Since we are dealing with log-normal distributions we are interested in log(x)
-        log_fcoll = np.log(fcoll_nonzero)
+        # Digitize the data into initial bins
+        bin_indices = np.digitize(delta_nonzero, bins=initial_bin_edges) - 1
 
-        # Define the bins for overdensities, starting from -1 to 10 with a bin width of 0.1
-        bin_edges = np.arange(-1, 10 + 0.1, 0.1)
-        # For Larger overdensities we have wider bins for sufficient statistics
-        bin_edges = np.append(bin_edges, 15)
-        bin_edges = np.append(bin_edges, 30)
-        bin_edges = np.append(bin_edges, 60)
-        bin_edges = np.append(bin_edges, 80)
-        bin_edges = np.append(bin_edges, 100)
+
+        # Call the function to adjust the bin edges based on the data
+        bin_edges = ensure_min_bin_count(initial_bin_edges, delta_nonzero, min_count=10)
 
         # Digitize the overdensity values to determine which bin they fall into
         bin_indices = np.digitize(delta_nonzero, bin_edges)
@@ -165,7 +209,7 @@ for j in range(len(zred_HESTIA)):
     pdf = data
 
     pdf=pdf[pdf[:,0]!=0]
-    pdf0 = pdf[0:][np.argsort(pdf[1:,0])] ## Make sure delta is increasing
+    pdf0 = pdf[1:][np.argsort(pdf[1:,0])] ## Make sure delta is increasing
 
     # First interpolate ln(mu) based on 1+delta, get rid of bins with 0
     overdensity_shape = InterpolatedUnivariateSpline(pdf0[:,0][pdf0[:,4]>10]+1,pdf0[:,1][pdf0[:,4]>10],k=1)
@@ -176,15 +220,30 @@ for j in range(len(zred_HESTIA)):
 
     overdense_scale = InterpolatedUnivariateSpline(pdf0[:,0][pdf0[:,4]>10]+1,pdf0[:,3][pdf0[:,4]>10],k=1)
     scale = overdense_scale(density_field)
+    
+    delta = delta[:10000]
+    min_fcoll = min_fcoll[:10000]
+    delta_sorted_indices = np.argsort(delta)  # Get the indices that would sort delta
+    delta_sorted = delta[delta_sorted_indices]  # Sort delta
+    min_fcoll_sorted = min_fcoll[delta_sorted_indices]  # Sort min_fcoll to match delta's order
 
+    # Downsample the sorted delta and min_fcoll for the interpolation
+    delta_sampled = delta_sorted + 1  # Add 1 if necessary for your specific data
+    min_fcoll_sampled = min_fcoll_sorted
 
-    delta_min = InterpolatedUnivariateSpline(pdf0[:,0][pdf0[:,4]>10]+1,pdf0[:,5][pdf0[:,4]>10], k=1)
+    # Remove duplicates to ensure delta_sampled is strictly increasing
+    delta_unique, unique_indices = np.unique(delta_sampled, return_index=True)
+    min_fcoll_unique = min_fcoll_sampled[unique_indices]
+
+    # Create the interpolating spline
+    delta_min = InterpolatedUnivariateSpline(delta_unique, min_fcoll_unique, k=1)
+    # delta_min = InterpolatedUnivariateSpline(pdf0[:,0][pdf0[:,4]>20]+1,pdf0[:,5][pdf0[:,4]>20], k=1)
     min_points = delta_min(density_field)
 
     delta_max = InterpolatedUnivariateSpline(pdf0[:,0][pdf0[:,4]>10]+1,pdf0[:,6][pdf0[:,4]>10], k=1)
     max_points = delta_max(density_field)
 
-    delta_mean = InterpolatedUnivariateSpline(pdf0[:,0][pdf0[:,4]>10]+1,pdf0[:,7][pdf0[:,4]>10], k=1)
+    delta_mean = InterpolatedUnivariateSpline(pdf0[:,0]+1,pdf0[:,7], k=1)
     mean_points = delta_mean(density_field)
 
     fig = plt.figure(figsize=(12,14))
@@ -196,25 +255,42 @@ for j in range(len(zred_HESTIA)):
     ax6 = fig.add_subplot(616)
 
 
-    ax1.plot(np.log10(pdf0[:,0]+1),pdf0[:,1],"k-", label = 'Data')
-    ax1.scatter(np.log10(density_field[::1000]),shape[::1000],color = 'red', label = 'interpolation')
+    # Downsample every 500th point for plotting
+    density_field_sampled = density_field[::500]
+    shape_sampled = shape[::500]
+    loc_sampled = loc[::500]
+    scale_sampled = scale[::500]
+    min_points_sampled = min_points[::500]
+    max_points_sampled = max_points[::500]
+    mean_points_sampled = mean_points[::500]
 
-    ax2.plot(np.log10(pdf0[:,0]+1),pdf0[:,2],"k-")
-    ax2.scatter(np.log10(density_field[::1000]),loc[::1000],color='red')
+    # Plot each subplot using the sampled data
 
+    # ax1
+    print('Max log_10(delta+1) in cubeP3M = ', np.max(np.log10(pdf0[:, 0] + 1)))
+    ax1.plot(np.log10(pdf0[:, 0] + 1), pdf0[:, 1], "k-", label='Data')
+    ax1.scatter(np.log10(density_field_sampled), shape_sampled, color='red', label='interpolation')
 
-    ax3.plot(np.log10(pdf0[:,0]+1),pdf0[:,3],"k-")
-    ax3.scatter(np.log10(density_field[::1000]),scale[::1000],color='red')
+    # ax2
+    ax2.plot(np.log10(pdf0[:, 0] + 1), pdf0[:, 2], "k-")
+    ax2.scatter(np.log10(density_field_sampled), loc_sampled, color='red')
 
+    # ax3
+    ax3.plot(np.log10(pdf0[:, 0] + 1), pdf0[:, 3], "k-")
+    ax3.scatter(np.log10(density_field_sampled), scale_sampled, color='red')
 
-    ax4.plot(np.log10(density_field[::1000]),min_points[::1000],"r.")
-    ax4.plot(np.log10(pdf[:,0]+1),pdf[:,5],"k-", lw= 2.5)
+    # ax4
+    ax4.plot(np.log10(density_field_sampled), min_points_sampled, "r.")
+    ax4.plot(np.log10(pdf[:, 0] + 1), pdf[:, 5], "k-", lw=2.5)
 
-    ax5.plot(np.log10(density_field[::1000]),max_points[::1000],"r.")
-    ax5.plot(np.log10(pdf[:,0]+1),pdf[:,6],"k-", lw= 2.5)
+    # ax5
+    ax5.plot(np.log10(density_field_sampled), max_points_sampled, "r.")
+    ax5.plot(np.log10(pdf[:, 0] + 1), pdf[:, 6], "k-", lw=2.5)
 
-    ax6.plot(np.log10(density_field[::1000]),mean_points[::1000],"r.")
-    ax6.plot(np.log10(pdf[:,0]+1),pdf[:,7],"k-", lw= 2.5)
+    # ax6
+    ax6.plot(np.log10(density_field_sampled), mean_points_sampled, "r.")
+    ax6.plot(np.log10(pdf[:, 0] + 1), pdf[:, 7], "k-", lw=2.5)
+
 
 
     ax1.set_title("shape")
@@ -231,6 +307,8 @@ for j in range(len(zred_HESTIA)):
     min_points[np.isnan(min_points)] = 0
     plt.savefig('./logfiles/interpolation_z{:.3f}.png'.format(zred_HESTIA[j]))
 
+    print('Log-file generated')
+
     Nhalo = np.zeros_like(density_field)
     # Create a mask for valid scale values (scale > 0)
     mask = (scale > 0) & (shape>0)
@@ -239,7 +317,7 @@ for j in range(len(zred_HESTIA)):
     if np.any(mask):
         Nhalo[mask] = lognorm.rvs(shape[mask], loc=loc[mask], scale=scale[mask])
 
-    complex_condition = (scale > 0) & (shape>0) & (min_points<max_points) & (min_points<mean_points) & (mean_points<max_points)  & ((Nhalo>max_points) | (Nhalo<min_points))
+    complex_condition = (scale > 0) & (shape>0) & (min_points<max_points)  & ((Nhalo>max_points) | (Nhalo<min_points))
     complex_condition_index = np.where(complex_condition==True)
     complex_condition_index= np.array(complex_condition_index[0])
 
@@ -253,24 +331,64 @@ for j in range(len(zred_HESTIA)):
             possible_values = lognorm.rvs(shape[k], loc=loc[k], scale=scale[k], size=1000) 
             possible_values = possible_values[(possible_values>min_points[k]) & (possible_values<max_points[k])]
             if len(possible_values)==0:
-                possible_values = lognorm.rvs(shape[k], loc=loc[k], scale=scale[k], size=1000000) 
+                possible_values = lognorm.rvs(shape[k], loc=loc[k], scale=scale[k], size=1000) 
                 possible_values = possible_values[(possible_values>min_points[k]) & (possible_values<max_points[k])]
+                if len(possible_values)==0:
+                    Nhalo[k] = mean_points[k]
+                    break
+            
             Nhalo[k] = np.random.choice(possible_values)
             
+    
+    counter =0        
     for k in simple_mask_index:
         while (Nhalo[k]<min_points[k]):
             possible_values = lognorm.rvs(shape[k], loc=loc[k], scale=scale[k], size=1000) 
             possible_values = possible_values[(possible_values>min_points[k])]
             if len(possible_values)==0:
-                possible_values = lognorm.rvs(shape[k], loc=loc[k], scale=scale[k], size=100000) 
+                possible_values = lognorm.rvs(shape[k], loc=loc[k], scale=scale[k], size=1000) 
                 possible_values = possible_values[(possible_values>min_points[k])]
-            Nhalo[k] = np.random.choice(possible_values)
+                if len(possible_values)==0:
+                    Nhalo[k] = mean_points[k]
+                    break
+            if len(possible_values)!=0:
+                Nhalo[k] = np.random.choice(possible_values)
 
-    step = 0.1
-    binning=np.arange(-1,10.0+step,step)
-    binning=np.append(binning,15)
-    binning = np.append(binning, 100)
+        # Nhalo[k] = np.random.choice(possible_values)
 
+    if np.max(Nhalo)>1:
+        indices = np.where(Nhalo > 1)[0]
+        print(indices)
+        if indices.size > 0:
+            for m in indices:  # Iterate directly over the indices
+                Nhalo[m] = mean_points[m]
+
+    # Due to the lack of statistics in the outer bins we want to populate these with the avg f_coll values
+    max_overdensity = np.argmax(density_field)
+    print('max_overdensity in HESTIA (log10(delta+1)): ', np.log10(density_field[max_overdensity]))
+    print('Nhalo at max_overdens: ', Nhalo[max_overdensity])
+    if Nhalo[max_overdensity] == 0:
+        non_empty_density = density_field[Nhalo != 0]
+        largest_density_non_empty = np.max(non_empty_density)
+        
+        density_field_populate = np.where(density_field>largest_density_non_empty)[0]
+        print(density_field_populate)
+        print(len(density_field_populate))
+        for k in density_field_populate:
+            Nhalo[k]=mean_points[k]
+    print('Nhalo at max_overdens: ', Nhalo[max_overdensity])
+
+
+    indices = np.where(Nhalo < min_points)[0]
+    if len(indices)>0:
+        for k in indices:
+            Nhalo[k] = mean_points[k]
+            if Nhalo[k]<min_points[k]:
+                Nhalo[k]=min_points[k]
+
+    print('implementing the fcoll=0')
+    
+    binning=np.array(bins)
     prob_zero_fcoll = {"%0.2f" %bin:[] for bin in binning} #probability of having a zero coll fraction for a given delta
 
 
@@ -278,7 +396,7 @@ for j in range(len(zred_HESTIA)):
         fcoll_current_bin = fcoll[((overdense-1)>binning[binindex]) & ((overdense-1)<binning[binindex+1])]
         nhalo_zero_fcoll = fcoll_current_bin[fcoll_current_bin==0]
         if len(fcoll_current_bin)==0:
-            prob_zero_fcoll["%0.2f" %binning[binindex]].append(0)
+            prob_zero_fcoll["%0.2f" %binning[binindex]].append(1)
         else:
             prob_zero_fcoll["%0.2f" %binning[binindex]].append(len(nhalo_zero_fcoll)/len(fcoll_current_bin))
 
@@ -293,7 +411,13 @@ for j in range(len(zred_HESTIA)):
             if len(prob_zero_fcoll[bin_key])==1:
                 x_values.append(binning[binindex])
                 y_values.append(prob_zero_fcoll[bin_key][0])
-            
+    
+    plt.figure()
+    plt.plot(np.log10(np.array(x_values)+1), np.array(y_values))
+    plt.xlabel('$\log_{10}(\delta + 1)$')
+    plt.ylabel(r'Probability $f_{coll}=0$')
+    plt.savefig('./empty_fcoll/zero_fcoll_prob_z{:.3f}.png'.format(zred_HESTIA[j]))
+
     overdens_hestia = density_field-1
 
     Nhalo_new = np.copy(Nhalo)
@@ -315,6 +439,7 @@ for j in range(len(zred_HESTIA)):
             Nhalo_current_bin[indices_to_zero] = 0
 
             Nhalo_new[(overdens_hestia>binning[binindex]) & (overdens_hestia<binning[binindex+1])] = Nhalo_current_bin
+    print('Nhalo at max_overdens: ', Nhalo_new[max_overdensity])
 
     import numpy as np
     import matplotlib.pyplot as plt
@@ -341,36 +466,54 @@ for j in range(len(zred_HESTIA)):
     # Plot the first heatmap
     im1 = ax1.imshow(heatmap1.T, origin='lower', cmap='seismic', aspect='auto',
                     extent=[xedges1[0], xedges1[-1], yedges1[0], yedges1[-1]], norm='log')
-    ax1.set_title('HESTIA 256**3')
-    ax1.set_xlabel('log10(density_field)')
-    ax1.set_ylabel('log10(Nhalo_new)')
+
+
+
+    ax1.set_title(r'HESTIA ${}^3$'.format(256))
+    ax1.set_xlabel('$\log_{10}(\delta + 1)$')
+    ax1.set_ylabel(r'$\log_{10}(f_{coll})$')
     fig.colorbar(im1, ax=ax1, label='Density')
 
     # Plot the second heatmap
     im2 = ax2.imshow(heatmap2.T, origin='lower', cmap='seismic', aspect='auto',
                     extent=[xedges2[0], xedges2[-1], yedges2[0], yedges2[-1]], norm='log')
-    ax2.plot(np.log10(pdf0[:,0]+1),np.log10(pdf0[:,6]),color = 'yellow', alpha=1, lw=3)
-    ax2.plot(np.log10(pdf0[:,0]+1),np.log10(pdf0[:,5]),color = 'pink', alpha=1, lw=3)
 
-    ax1.plot(np.log10(pdf0[:,0]+1),np.log10(pdf0[:,6]),color = 'yellow', alpha=1, lw=3)
-    ax1.plot(np.log10(pdf0[:,0]+1),np.log10(pdf0[:,5]),color = 'pink', alpha=1, lw=3)
+    # contours = ax1.contour(heatmap2.T, levels=5, origin='lower', 
+    #                     extent=[xedges2[0], xedges2[-1], yedges2[0], yedges2[-1]], 
+    #                     colors='black', label='High-res sim contours', alpha =0.5)
 
+    # # Correct the extent for ax2 to match heatmap2's xedges2 and yedges2
+    # contours = ax2.contour(heatmap2.T, levels=5, origin='lower', 
+    #                     extent=[xedges2[0], xedges2[-1], yedges2[0], yedges2[-1]], 
+    #                     colors='black', label='High-res sim contours', alpha =0.5)
 
-    ax1.scatter(np.log10(density_field[::1000]),np.log10(max_points[::1000]))
-    ax1.plot(np.log10(pdf[:,0]+1),np.log10(pdf[:,6]),"yellow", lw= 2.5)
+    # contour_proxy1 = plt.Line2D([0], [0], color='black', label='High-res sim contours')
+
+    # # Add legend with the contour line label
+    # ax1.legend(handles=[contour_proxy1])
+    # ax2.legend(handles=[contour_proxy1])
 
 
     ax2.set_title('High Res simulation')
-    ax2.set_xlabel(r'log$_{10}(/delta+1)$')
-    ax2.set_ylabel(r'log$_{10}(f_{coll})$')
+    ax1.set_xlabel('$\log_{10}(\delta + 1)$')
+    ax2.set_xlabel('$\log_{10}(\delta + 1)$')
+
+    ax1.set_ylabel(r'$\log_{10}(f_{coll})$')
+    ax2.set_ylabel(r'$\log_{10}(f_{coll})$')
+
     fig.colorbar(im2, ax=ax2, label='Density')
 
-    ax1.set_ylim(-3,1)
-    ax2.set_ylim(-3,1)
 
-    ax1.set_xlim(-0.5,2)
-    ax1.set_xlim(-0.5,2)
+    ax1.set_ylim(np.log10(min(float(np.min(Nhalo_new[Nhalo_new > 0])), float(np.min(fcoll[fcoll>0])))), np.log10(max(float(np.max(Nhalo_new[Nhalo_new > 0])), float(np.max(fcoll[fcoll>0])))))
+    ax2.set_ylim(np.log10(min(float(np.min(Nhalo_new[Nhalo_new > 0])), float(np.min(fcoll[fcoll>0])))), np.log10(max(float(np.max(Nhalo_new[Nhalo_new > 0])), float(np.max(fcoll[fcoll>0])))))
 
-    # Show the plots
-    plt.savefig('./results/fcoll_implementation_z{:.3f}.png'.format(zred_HESTIA[j]))
+    ax1.set_xlim(np.log10(min(float(np.min(density_field[Nhalo_new > 0])), float(np.min(overdense[fcoll>0])))), np.log10(max(float(np.max(density_field[Nhalo_new > 0])), float(np.max(overdense[fcoll>0])))))
+    ax2.set_xlim(np.log10(min(float(np.min(density_field[Nhalo_new > 0])), float(np.min(overdense[fcoll>0])))), np.log10(max(float(np.max(density_field[Nhalo_new > 0])), float(np.max(overdense[fcoll>0])))))
+    fig.suptitle(r'Implemeted $f_{coll}$ for halos $10^9 <M_{halo}[M_{\odot}]< 10^{9.4}$ on $256^3$ grid', fontsize=16)
+
+    plt.savefig('./results/scatterImp_M_9to9_4_1024_256_z{:.3f}.png'.format(zred_HESTIA[j]))
     np.save('./results/fcoll_z{:.3f}'.format(zred_HESTIA[j]), Nhalo_new)
+
+
+    
+    
