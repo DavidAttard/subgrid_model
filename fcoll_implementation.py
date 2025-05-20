@@ -1,3 +1,5 @@
+# source /p/project/lgreion/david/hestia_bin/myenv/bin/activate
+
 import os
 import sys
 import scipy.stats 
@@ -9,7 +11,7 @@ from matplotlib.ticker import FormatStrFormatter
 from scipy.interpolate import InterpolatedUnivariateSpline,UnivariateSpline, interp1d
 
 
-min_resolved_mass = 10**9
+min_resolved_mass = 10**8
 
 # Function to ensure each bin has at least min_count values
 def ensure_min_bin_count(bin_edges, data, min_count=10):
@@ -34,38 +36,26 @@ def ensure_min_bin_count(bin_edges, data, min_count=10):
 
 Ncube=256**3
 
-zlist = np.loadtxt('/p/project/lgreion/david/HESTIA_multirealizations/runs/Full_box/37_11/subgrid/HMACH_9_9.4/redshift_matching/matched_z.txt')
+zlist = np.loadtxt('./redshift_matching/matched_z.txt')
 
 zred_HESTIA = zlist[:,0]
 zred_highRes = zlist[:,1]
 # zred=7.570
 print(zred_HESTIA)
-# for j in range(7,len(zred_HESTIA)):
-for j in range(28,len(zred_HESTIA)):
+# for j in range(1,len(zred_HESTIA)):
+for j in range(0,1):
 
     print('Doing z={:.3f}'.format(zred_HESTIA[j]))
     # Code to extract infor from the high res simulation 4096^3 coarsened to 256^3
     sz = '%.3f' %zred_highRes[j]
-    txt_file = open('/p/project/lgreion/david/HESTIA_multirealizations/subgrid_modelling/HMACH_binning/binning/'+sz+'halo_mass256.bin')
-    fcoll = []
-    dens = []
+    fname = f"/p/project/lgreion/david/subgrid_MultiGrid/LMACH/binning/merged_coarsened_256_64_z{sz}.dat"
+    # This reads column 0 into dens, column 1 (last) into fcoll in one pass.
+    dens, fcoll = np.loadtxt(fname, usecols=(0, 1), unpack=True)
 
-    for line in txt_file:
-        # we can process file line by line here, for simplicity I am taking count of lines
-        elements = line.split()
-        dens_value = float(elements[0])
-        dens.append(dens_value)
-        fcoll_value = float(elements[-1])
-        fcoll.append(fcoll_value)
-        
-    txt_file.close()
-
-    # The density values are stored in the 1st entry of every two lines
-    #dens = dens[0::2]
-    overdense = np.array(dens/np.average(dens))
-
-    fcoll = np.array(fcoll)# Code to extract infor from the high res simulation 4096^3 coarsened to 256^3
-    min_fcoll = min_resolved_mass/np.array(dens)
+    # The fcoll column contains the collapsed mass and not a fraction hence needs to be normalised
+    fcoll = fcoll / dens
+    overdense = dens / dens.mean()
+    min_fcoll = min_resolved_mass / dens
 
     # Loading the HESTIA data
     density_data=np.load('/p/project/lgreion/david/HESTIA_multirealizations/runs/Full_box/37_11/dens_fields/DM_count_dens/DM_dens_cgs_{:.3f}_1024_256.npy'.format(zred_HESTIA[j])).flatten()
@@ -80,9 +70,6 @@ for j in range(28,len(zred_HESTIA)):
     delta = overdense-1
     delta_nonzero = delta[fcoll!=0]
     fcoll_nonzero = fcoll[fcoll!=0]
-
-    # initial_bin_edges = np.arange(-1, 15 + 0.1, 0.1)
-    # initial_bin_edges = np.append(initial_bin_edges, [20,25,30,35,40,50,60,70,80,90,100,120,140,160,180,200,240,260,300])  # Wider bins for larger values
 
     # Initial bin edges from -1 to 15 with width 0.1
     initial_bin_edges = np.arange(-1, 15 + 0.1, 0.1)
@@ -111,20 +98,17 @@ for j in range(28,len(zred_HESTIA)):
             # Reset start_bin and bin width
             start_bin = next_bin_edge
             current_bin_width = 5  # Reset bin width to 0.1 for next bin
-            print(bins)
-            print(len(delta_above_15))
         else:
             # If fewer than 10 entries, increase the bin width and try again
             current_bin_width += 5
 
     # Convert bins to numpy array for easy use
     bin_edges = np.array(bins)
-
+    print('These are the final bin edges: ', bin_edges)
 
     # Digitize the data into initial bins
     bin_indices = np.digitize(delta_nonzero, bins=bin_edges) - 1
 
-    print(bin_edges)
     # Digitize the overdensity values to determine which bin they fall into
     bin_indices = np.digitize(delta_nonzero, bin_edges)
 
@@ -178,7 +162,7 @@ for j in range(28,len(zred_HESTIA)):
         avg_collapse_per_bin = np.zeros(len(bin_edges) - 1)
 
         # Calculate the mean collapse fraction for each bin
-        for i in range(1, len(bin_edges)):
+        for i in range(2, len(bin_edges)):
             # Select the collapse fractions & deltas that fall into the current bin
             in_bin_fcoll = fcoll_nonzero[bin_indices == i]
             in_bin_delta = delta_nonzero[bin_indices == i]
@@ -196,15 +180,8 @@ for j in range(28,len(zred_HESTIA)):
     data = np.column_stack((delta_collapse_per_bin, shape_collapse_per_bin, loc_collapse_per_bin, scale_collapse_per_bin, N_collapse_per_bin, min_collapse_per_bin, max_collapse_per_bin,avg_collapse_per_bin))
 
         
-    print()
     fout=open('./logfiles/logfile_fits_{:.3f}.txt'.format(zred_HESTIA[j]), "w")
     np.savetxt(fout,data,fmt="%.3e",header='delta, shape, loc, scale, N fcoll in bins, minimum fcoll, max fcoll, mean fcoll')
-
-
-    # filename = './new_logfile.txt'
-    # #filename = '7.570_lognormdistr_114Mpcbox256'
-    # filein = open(filename, 'r')
-    # pdf = np.genfromtxt(filein, float)
 
     pdf = data
 
@@ -326,35 +303,27 @@ for j in range(28,len(zred_HESTIA)):
     simple_mask_index= np.array(simple_mask_index[0])
 
     i =0
+    print('Doing complex condition')
     for k in complex_condition_index:
         while (Nhalo[k]<min_points[k]) or (Nhalo[k]>max_points[k]):
             possible_values = lognorm.rvs(shape[k], loc=loc[k], scale=scale[k], size=1000) 
             possible_values = possible_values[(possible_values>min_points[k]) & (possible_values<max_points[k])]
             if len(possible_values)==0:
-                possible_values = lognorm.rvs(shape[k], loc=loc[k], scale=scale[k], size=1000) 
-                possible_values = possible_values[(possible_values>min_points[k]) & (possible_values<max_points[k])]
-                if len(possible_values)==0:
-                    Nhalo[k] = mean_points[k]
-                    break
-            
+                Nhalo[k] = mean_points[k]
+                break
             Nhalo[k] = np.random.choice(possible_values)
             
-    
-    counter =0        
+    counter =0   
+    print('Doing simple condition')   
+    print(len(simple_mask_index))  
     for k in simple_mask_index:
-        while (Nhalo[k]<min_points[k]):
-            possible_values = lognorm.rvs(shape[k], loc=loc[k], scale=scale[k], size=1000) 
-            possible_values = possible_values[(possible_values>min_points[k])]
-            if len(possible_values)==0:
-                possible_values = lognorm.rvs(shape[k], loc=loc[k], scale=scale[k], size=1000) 
-                possible_values = possible_values[(possible_values>min_points[k])]
-                if len(possible_values)==0:
-                    Nhalo[k] = mean_points[k]
-                    break
-            if len(possible_values)!=0:
-                Nhalo[k] = np.random.choice(possible_values)
-
-        # Nhalo[k] = np.random.choice(possible_values)
+        counter+=1
+        possible_values = lognorm.rvs(shape[k], loc=loc[k], scale=scale[k], size=500) 
+        possible_values = possible_values[(possible_values>min_points[k])]
+        if len(possible_values)==0:
+            Nhalo[k] = mean_points[k]
+            break
+        Nhalo[k] = np.random.choice(possible_values)
 
     if np.max(Nhalo)>1:
         indices = np.where(Nhalo > 1)[0]
@@ -386,59 +355,67 @@ for j in range(28,len(zred_HESTIA)):
             if Nhalo[k]<min_points[k]:
                 Nhalo[k]=min_points[k]
 
+
     print('implementing the fcoll=0')
     
     binning=np.array(bins)
-    prob_zero_fcoll = {"%0.2f" %bin:[] for bin in binning} #probability of having a zero coll fraction for a given delta
 
+    # assume `bins` is your bin edges array
+    bin_edges = np.asarray(bins)
+    N = len(bin_edges) - 1
 
-    for binindex in range(len(binning)-1):
-        fcoll_current_bin = fcoll[((overdense-1)>binning[binindex]) & ((overdense-1)<binning[binindex+1])]
-        nhalo_zero_fcoll = fcoll_current_bin[fcoll_current_bin==0]
-        if len(fcoll_current_bin)==0:
-            prob_zero_fcoll["%0.2f" %binning[binindex]].append(1)
-        else:
-            prob_zero_fcoll["%0.2f" %binning[binindex]].append(len(nhalo_zero_fcoll)/len(fcoll_current_bin))
+    # shift and digitize
+    odm1    = np.asarray(overdense) - 1.0
+    bin_idx = np.digitize(odm1, bin_edges)  # values 1..N go in bins 0..N-1
 
-    # Assuming binning and prob_zero_fcoll are your variables
-    x_values = []
-    y_values = []
+    # total and zero counts per bin index 1..N
+    counts_total = np.bincount(bin_idx,       minlength=N+2)[1:N+1]
+    counts_zero  = np.bincount(bin_idx[fcoll==0], minlength=N+2)[1:N+1]
 
-    # Extracting x and y values
-    for binindex in range(len(binning)):
-        bin_key = "%0.2f" % binning[binindex]
-        if bin_key in prob_zero_fcoll:
-            if len(prob_zero_fcoll[bin_key])==1:
-                x_values.append(binning[binindex])
-                y_values.append(prob_zero_fcoll[bin_key][0])
-    
+    # zero-fraction with empty-bin=1 rule
+    prob_zero = np.where(counts_total > 0,
+                        counts_zero / counts_total,
+                        1.0)      # array of length N, one value per bin
+
+    # your x_values and y_values for plotting
+    x_values = bin_edges[:-1]
+    y_values = prob_zero
+
     plt.figure()
-    plt.plot(np.log10(np.array(x_values)+1), np.array(y_values))
+    plt.plot(np.log10(x_values + 1), y_values)
     plt.xlabel('$\log_{10}(\delta + 1)$')
     plt.ylabel(r'Probability $f_{coll}=0$')
     plt.savefig('./empty_fcoll/zero_fcoll_prob_z{:.3f}.png'.format(zred_HESTIA[j]))
 
-    overdens_hestia = density_field-1
+    # Prepare new overdensity index array once:
+    odm1_new    = density_field - 1.0
+    bin_idx_new = np.digitize(odm1_new, bin_edges)   # values 1..N
 
-    Nhalo_new = np.copy(Nhalo)
+    # Copy your halo counts array
+    Nhalo_new = Nhalo.copy()
 
-    for binindex in range(len(binning)-1):
-        bin_key = "%0.2f" % binning[binindex]
-        Nhalo_current_bin = Nhalo_new[(overdens_hestia>binning[binindex]) & (overdens_hestia<binning[binindex+1])]
-        
-        if len(prob_zero_fcoll[bin_key])==1:
-            prob_zero = prob_zero_fcoll[bin_key][0]
+    # Loop over each bin k = 0..N-1
+    for k in range(N):
+        # mask of cells in bin k+1
+        mask = (bin_idx_new == k+1)
+        n_in_bin = mask.sum()
+        if n_in_bin == 0:
+            continue
 
-            # Calculate the number of entries to set to zero
-            num_to_zero = int(prob_zero * len(Nhalo_current_bin))
+        # probability of zeroing from your precomputed array
+        frac_zero = prob_zero[k]    # no string lookup needed
 
-            # Randomly select indices to set to zero
-            indices_to_zero = np.random.choice(len(Nhalo_current_bin), size=num_to_zero, replace=False)
+        # number to zero
+        num_zero = int(frac_zero * n_in_bin)
+        if num_zero == 0:
+            continue
 
-            # Set the selected entries to zero
-            Nhalo_current_bin[indices_to_zero] = 0
+        # randomly zero that fraction of halos
+        idxs = np.flatnonzero(mask)
+        to_zero = np.random.choice(idxs, size=num_zero, replace=False)
+        Nhalo_new[to_zero] = 0
 
-            Nhalo_new[(overdens_hestia>binning[binindex]) & (overdens_hestia<binning[binindex+1])] = Nhalo_current_bin
+
     print('Nhalo at max_overdens: ', Nhalo_new[max_overdensity])
 
     import numpy as np
@@ -467,7 +444,9 @@ for j in range(28,len(zred_HESTIA)):
     im1 = ax1.imshow(heatmap1.T, origin='lower', cmap='seismic', aspect='auto',
                     extent=[xedges1[0], xedges1[-1], yedges1[0], yedges1[-1]], norm='log')
 
-
+    total_counts = heatmap1.sum()
+    print("Total counts HESTIA =", total_counts)
+    print("Fraction non empty HESTIA =", total_counts/256**3)
 
     ax1.set_title(r'HESTIA ${}^3$'.format(256))
     ax1.set_xlabel('$\log_{10}(\delta + 1)$')
@@ -477,6 +456,10 @@ for j in range(28,len(zred_HESTIA)):
     # Plot the second heatmap
     im2 = ax2.imshow(heatmap2.T, origin='lower', cmap='seismic', aspect='auto',
                     extent=[xedges2[0], xedges2[-1], yedges2[0], yedges2[-1]], norm='log')
+    
+    total_counts = heatmap2.sum()
+    print("Total counts CUBEP3M =", total_counts)
+    print("Fraction non empty CUBEP3m =", total_counts/((256**3)*4))
 
     # contours = ax1.contour(heatmap2.T, levels=5, origin='lower', 
     #                     extent=[xedges2[0], xedges2[-1], yedges2[0], yedges2[-1]], 
@@ -509,11 +492,11 @@ for j in range(28,len(zred_HESTIA)):
 
     ax1.set_xlim(np.log10(min(float(np.min(density_field[Nhalo_new > 0])), float(np.min(overdense[fcoll>0])))), np.log10(max(float(np.max(density_field[Nhalo_new > 0])), float(np.max(overdense[fcoll>0])))))
     ax2.set_xlim(np.log10(min(float(np.min(density_field[Nhalo_new > 0])), float(np.min(overdense[fcoll>0])))), np.log10(max(float(np.max(density_field[Nhalo_new > 0])), float(np.max(overdense[fcoll>0])))))
-    fig.suptitle(r'Implemeted $f_{coll}$ for halos $10^9 <M_{halo}[M_{\odot}]< 10^{9.4}$ on $256^3$ grid', fontsize=16)
+    fig.suptitle(r'Implemeted $f_{coll}$ for halos $10^8 <M_{halo}[M_{\odot}]< 10^{9}$ on $256^3$ grid', fontsize=16)
 
-    plt.savefig('./results/scatterImp_M_9to9_4_1024_256_z{:.3f}.png'.format(zred_HESTIA[j]))
+    plt.savefig('./results/scatterImp_M_8to9_1024_256_z{:.3f}.png'.format(zred_HESTIA[j]))
     np.save('./results/fcoll_z{:.3f}'.format(zred_HESTIA[j]), Nhalo_new)
-
+    
 
     
     
