@@ -1,0 +1,20 @@
+Memory usage before job starts:
+               total        used        free      shared  buff/cache   available
+Mem:           187Gi        10Gi       177Gi       2.7Gi       2.7Gi       176Gi
+Swap:             0B          0B          0B
+ rho_bar(Mpc^3/Msun)=   40606661905.6886     
+ rho_bar_cgs=  2.748174512287398E-030
+ rho_bar(Mpc^3/Msun)=   40606661905.6886     
+ rho_bar_cgs=  2.748174512287398E-030
+ rho_bar(Mpc^3/Msun)=   40606661905.6886     
+ rho_bar_cgs=  2.748174512287398E-030
+ rho_bar(Mpc^3/Msun)=   40606661905.6886     
+ rho_bar_cgs=  2.748174512287398E-030
+ Invalid checkpoint index. Exiting.
+ Invalid checkpoint index. Exiting.
+ Invalid checkpoint index. Exiting.
+ Invalid checkpoint index. Exiting.
+Memory usage after job finishes:
+               total        used        free      shared  buff/cache   available
+Mem:           187Gi        10Gi       177Gi       2.7Gi       2.8Gi       176Gi
+Swap:             0B          0B          0B

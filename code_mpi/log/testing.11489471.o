@@ -1,0 +1,220 @@
+Memory usage before job starts:
+               total        used        free      shared  buff/cache   available
+Mem:           187Gi        10Gi       177Gi       2.6Gi       2.7Gi       176Gi
+Swap:             0B          0B          0B
+ rho_bar(Mpc^3/Msun)=   40606661905.6886     
+ rho_bar_cgs=  2.748174512287398E-030
+ rho_bar(Mpc^3/Msun)=   40606661905.6886     
+ rho_bar_cgs=  2.748174512287398E-030
+ rho_bar(Mpc^3/Msun)=   40606661905.6886     
+ rho_bar_cgs=  2.748174512287398E-030
+ rho_bar(Mpc^3/Msun)=   40606661905.6886     
+ rho_bar_cgs=  2.748174512287398E-030
+ Invalid checkpoint index. Exiting.
+ Invalid checkpoint index. Exiting.
+ Invalid checkpoint index. Exiting.
+ Processing z=   5.873000    
+ doing z=   5.873000    
+         512
+ Total mass:   549755792588.530     
+ maximum density:    1445521.87500000     
+   26.9985141754150     
+ First coarse dens value:    368016056.360978     
+ First coll frac value:   0.000000000000000E+000
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   7978464307.81775     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)   117549315.581337     
+ Wrote: ./../binning/coarsened_shift_01_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   6711896872.28220     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)   151676536.233983     
+ Wrote: ./../binning/coarsened_shift_02_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5968865199.48100     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)   151676536.233983     
+ Wrote: ./../binning/coarsened_shift_03_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5751617922.74789     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)   151676536.233983     
+ Wrote: ./../binning/coarsened_shift_04_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   6549648170.07016     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)   109965488.769638     
+ Wrote: ./../binning/coarsened_shift_05_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5453635486.62828     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_06_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   4861541748.99296     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_07_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5078701986.19458     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_08_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   6311301120.81866     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)   109965488.769638     
+ Wrote: ./../binning/coarsened_shift_09_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5427092087.36295     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_10_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   4909074469.63994     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_11_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5181893200.05395     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_12_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   9184239293.76663     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)   109965488.769638     
+ Wrote: ./../binning/coarsened_shift_13_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   9746394604.02306     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_14_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   9786200028.54710     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)   170636103.263231     
+ Wrote: ./../binning/coarsened_shift_15_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   9988338527.82998     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)   170636103.263231     
+ Wrote: ./../binning/coarsened_shift_16_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   7674966957.80657     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)   117549315.581337     
+ Wrote: ./../binning/coarsened_shift_17_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   7181699558.29116     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)   151676536.233983     
+ Wrote: ./../binning/coarsened_shift_18_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   6270247426.31598     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)   151676536.233983     
+ Wrote: ./../binning/coarsened_shift_19_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5638548517.64017     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)   151676536.233983     
+ Wrote: ./../binning/coarsened_shift_20_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   6719322350.72028     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_21_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   6087304676.80200     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_22_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   4924240693.03629     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_23_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   4395437850.70890     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_24_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   6177557015.34878     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_25_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5657601879.35670     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_26_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   4764838616.36895     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_27_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   4361084652.37531     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_28_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   7793309168.83988     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)   174428016.669080     
+ Wrote: ./../binning/coarsened_shift_29_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   6692362820.47791     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_30_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5777992088.72582     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_31_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5194606710.64004     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_32_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   6824249773.42005     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_33_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   7041165633.45856     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)   151676536.233983     
+ Wrote: ./../binning/coarsened_shift_34_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   6558911665.64685     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)   151676536.233983     
+ Wrote: ./../binning/coarsened_shift_35_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5933077928.22191     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)   151676536.233983     
+ Wrote: ./../binning/coarsened_shift_36_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   6816675699.63575     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_37_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   6054436149.96985     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_38_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   4997840418.96633     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_39_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   4305474830.27739     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_40_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   6704040510.37346     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_41_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5680659045.05649     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_42_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   4721043223.63577     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_43_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   4232121748.89948     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_44_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   7856343596.05141     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)   174428016.669080     
+ Wrote: ./../binning/coarsened_shift_45_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5723773591.85711     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_46_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   4899135514.53570     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_47_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   4450914019.80736     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_48_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5492328885.21656     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_49_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5528726908.62620     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_50_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5729799545.21814     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_51_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5746785445.93907     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_52_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   6384191593.36093     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_53_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5633272719.26735     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_54_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5303850394.01669     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_55_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5052929618.53116     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_56_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   6851353769.25066     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_57_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5824498837.54029     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_58_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5232267516.04129     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_59_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   4959132996.55889     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_60_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   7561772269.51100     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)   174428016.669080     
+ Wrote: ./../binning/coarsened_shift_61_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5733812838.24251     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_62_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   5118650691.98483     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_63_256_z5.873.dat
+  Saving the coarsened grid: coarse_dens_coarse(1,1,1)   4737702605.87332     
+  Saving the coarsened grid: coll_frac_coarse(1,1,1)  0.000000000000000E+000
+ Wrote: ./../binning/coarsened_shift_64_256_z5.873.dat
+ done z=   5.873000    
+Memory usage after job finishes:
+               total        used        free      shared  buff/cache   available
+Mem:           187Gi        10Gi       177Gi       2.6Gi       2.7Gi       176Gi
+Swap:             0B          0B          0B

@@ -36,14 +36,14 @@ def ensure_min_bin_count(bin_edges, data, min_count=10):
 
 Ncube=256**3
 
-zlist = np.loadtxt('./redshift_matching/matched_z.txt')
+zlist = np.loadtxt('/p/project/lgreion/david/subgrid_MultiGrid/LMACH/subgrid_testing/redshift_matching/matched_z.txt')
 
 zred_HESTIA = zlist[:,0]
 zred_highRes = zlist[:,1]
 # zred=7.570
 print(zred_HESTIA)
 # for j in range(5,len(zred_HESTIA)):
-for j in range(1,2):
+for j in range(9,10):
 
     print('Doing z={:.3f}'.format(zred_HESTIA[j]))
     # Code to extract infor from the high res simulation 4096^3 coarsened to 256^3
@@ -52,8 +52,8 @@ for j in range(1,2):
     # fname = f"/p/project/lgreion/david/subgrid_MultiGrid/LMACH/binning/merged_coarsened_256_64_z{sz}.dat"
 
     # This reads column 0 into dens, column 1 (last) into halo numbers in one pass.
-    dens, halo_num = np.loadtxt(fname, usecols=(0, 1), unpack=True)
-
+    dens, halo_num1, halo_num2 = np.loadtxt(fname, usecols=(0, 1, 2), unpack=True)
+    halo_num = halo_num1 + halo_num2
     
     overdense = dens / dens.mean()
     min_halo_num = 0
@@ -218,13 +218,15 @@ for j in range(1,2):
 
 
     # Downsample every 500th point for plotting
-    density_field_sampled = density_field[::500]
-    shape_sampled = shape[::500]
-    loc_sampled = loc[::500]
-    scale_sampled = scale[::500]
-    min_points_sampled = min_points[::500]
-    max_points_sampled = max_points[::500]
-    mean_points_sampled = mean_points[::500]
+    density_field_sampled = np.concatenate((density_field[::500], density_field[-30:]))
+    print(density_field[-30:])
+    print(np.log10(density_field_sampled[-10:]))
+    shape_sampled = np.concatenate((shape[::500], shape[-30:]))
+    loc_sampled = np.concatenate((loc[::500], loc[-30:]))
+    scale_sampled = np.concatenate((scale[::500], scale[-30:]))
+    min_points_sampled = np.concatenate((min_points[::500], min_points[-30:]))
+    max_points_sampled = np.concatenate((max_points[::500], max_points[-30:]))
+    mean_points_sampled = np.concatenate((mean_points[::500], mean_points[-30:]))
 
     # Plot each subplot using the sampled data
 
@@ -261,7 +263,7 @@ for j in range(1,2):
     ax4.set_title("min f_coll")
     ax5.set_title("max f_coll")
     ax6.set_title("mean f_coll")
-
+    ax1.set_yscale('symlog', linthresh=1e-2)
 
     ax6.set_xlabel(r'log$_{10}(1+\delta)$', fontsize=15)
     ax1.legend()
@@ -274,6 +276,7 @@ for j in range(1,2):
     Nhalo = np.zeros_like(density_field)
     # Create a mask for valid scale values (scale > 0)
     mask = (scale > 0) & (shape>0)
+    max_points = np.ceil(max_points)
 
     # Apply the lognormal sampling only where the mask is True
     if np.any(mask):
@@ -289,6 +292,8 @@ for j in range(1,2):
 
     i =0
     print('Doing complex condition')
+    print('min_points: ',min_points)
+    print('max_points: ', max_points)
     for k in complex_condition_index:
         while (Nhalo[k]<min_points[k]) or (Nhalo[k]>max_points[k]):
             possible_values = np.ceil(lognorm.rvs(shape[k], loc=loc[k], scale=scale[k], size=1000))
@@ -310,12 +315,12 @@ for j in range(1,2):
             break
         Nhalo[k] = np.random.choice(possible_values)
 
-    if np.max(Nhalo)>1:
-        indices = np.where(Nhalo > 1)[0]
-        print(indices)
-        if indices.size > 0:
-            for m in indices:  # Iterate directly over the indices
-                Nhalo[m] = mean_points[m]
+    # if np.max(Nhalo)>1:
+    #     indices = np.where(Nhalo > 1)[0]
+    #     print(indices)
+    #     if indices.size > 0:
+    #         for m in indices:  # Iterate directly over the indices
+    #             Nhalo[m] = mean_points[m]
 
     # Due to the lack of statistics in the outer bins we want to populate these with the avg f_coll values
     max_overdensity = np.argmax(density_field)
@@ -369,7 +374,7 @@ for j in range(1,2):
     plt.figure()
     plt.plot(np.log10(x_values + 1), y_values)
     plt.xlabel('$\log_{10}(\delta + 1)$')
-    plt.ylabel(r'Probability $f_{coll}=0$')
+    plt.ylabel(r'Probability $N_{halo}=0$')
     plt.savefig('./empty_halo_num/zero_halo_num_prob_z{:.3f}.png'.format(zred_HESTIA[j]))
 
     # Prepare new overdensity index array once:
@@ -409,7 +414,7 @@ for j in range(1,2):
 
     # Log-transform the data and filter for the first heatmap
     x1 = np.log10(density_field[Nhalo_new > 0])
-    y1 = np.log10(Nhalo_new[Nhalo_new > 0])
+    y1 = (Nhalo_new[Nhalo_new > 0])
 
     # Create a 2D histogram for the first heatmap
     heatmap1, xedges1, yedges1 = np.histogram2d(x1, y1, bins=100)
@@ -417,7 +422,7 @@ for j in range(1,2):
 
     # Log-transform the data and filter for the second heatmap
     x2 = np.log10(overdense[halo_num>0])
-    y2 = np.log10(halo_num[halo_num>0])
+    y2 = (halo_num[halo_num>0])
 
     # Create a 2D histogram for the second heatmap
     heatmap2, xedges2, yedges2 = np.histogram2d(x2, y2, bins=100)
@@ -429,22 +434,17 @@ for j in range(1,2):
     im1 = ax1.imshow(heatmap1.T, origin='lower', cmap='seismic', aspect='auto',
                     extent=[xedges1[0], xedges1[-1], yedges1[0], yedges1[-1]], norm='log')
 
-    total_counts = heatmap1.sum()
-    print("Total counts HESTIA =", total_counts)
-    print("Fraction non empty HESTIA =", total_counts/256**3)
+
 
     ax1.set_title(r'HESTIA ${}^3$'.format(256))
-    ax1.set_xlabel('$\log_{10}(\delta + 1)$')
-    ax1.set_ylabel(r'$\log_{10}(f_{coll})$')
     fig.colorbar(im1, ax=ax1, label='Density')
 
     # Plot the second heatmap
     im2 = ax2.imshow(heatmap2.T, origin='lower', cmap='seismic', aspect='auto',
                     extent=[xedges2[0], xedges2[-1], yedges2[0], yedges2[-1]], norm='log')
     
-    total_counts = heatmap2.sum()
-    print("Total counts CUBEP3M =", total_counts)
-    print("Fraction non empty CUBEP3m =", total_counts/((256**3)*4))
+    print('Total N halos implemented (HESTIA): ', np.sum(Nhalo_new))    
+    print('Total N halos in High-res (CubeP3M): ', np.sum(halo_num))    
 
     # contours = ax1.contour(heatmap2.T, levels=5, origin='lower', 
     #                     extent=[xedges2[0], xedges2[-1], yedges2[0], yedges2[-1]], 
@@ -466,18 +466,18 @@ for j in range(1,2):
     ax1.set_xlabel('$\log_{10}(\delta + 1)$')
     ax2.set_xlabel('$\log_{10}(\delta + 1)$')
 
-    ax1.set_ylabel(r'$\log_{10}(f_{coll})$')
-    ax2.set_ylabel(r'$\log_{10}(f_{coll})$')
+    ax1.set_ylabel(r'N$_{halo}$')
+    ax2.set_ylabel(r'N$_{halo}$')
 
     fig.colorbar(im2, ax=ax2, label='Density')
 
 
-    ax1.set_ylim(np.log10(min(float(np.min(Nhalo_new[Nhalo_new > 0])), float(np.min(halo_num[halo_num>0])))), np.log10(max(float(np.max(Nhalo_new[Nhalo_new > 0])), float(np.max(halo_num[halo_num>0])))))
-    ax2.set_ylim(np.log10(min(float(np.min(Nhalo_new[Nhalo_new > 0])), float(np.min(halo_num[halo_num>0])))), np.log10(max(float(np.max(Nhalo_new[Nhalo_new > 0])), float(np.max(halo_num[halo_num>0])))))
+    ax1.set_ylim((min(float(np.min(Nhalo_new[Nhalo_new > 0])), float(np.min(halo_num[halo_num>0])))), (max(float(np.max(Nhalo_new[Nhalo_new > 0])), float(np.max(halo_num[halo_num>0])))))
+    ax2.set_ylim((min(float(np.min(Nhalo_new[Nhalo_new > 0])), float(np.min(halo_num[halo_num>0])))), (max(float(np.max(Nhalo_new[Nhalo_new > 0])), float(np.max(halo_num[halo_num>0])))))
 
     ax1.set_xlim(np.log10(min(float(np.min(density_field[Nhalo_new > 0])), float(np.min(overdense[halo_num>0])))), np.log10(max(float(np.max(density_field[Nhalo_new > 0])), float(np.max(overdense[halo_num>0])))))
     ax2.set_xlim(np.log10(min(float(np.min(density_field[Nhalo_new > 0])), float(np.min(overdense[halo_num>0])))), np.log10(max(float(np.max(density_field[Nhalo_new > 0])), float(np.max(overdense[halo_num>0])))))
-    fig.suptitle(r'Implemeted $f_{coll}$ for halos $10^8 <M_{halo}[M_{\odot}]< 10^{9}$ on $256^3$ grid', fontsize=16)
+    fig.suptitle(r'Implemeted $N_{halo}$ for halos $10^8 <M_{halo}[M_{\odot}]< 10^{9}$ on $256^3$ grid', fontsize=16)
 
     plt.savefig('./results/scatterImp_M_8to9_1024_256_z{:.3f}.png'.format(zred_HESTIA[j]))
     np.save('./results/halo_num_z{:.3f}'.format(zred_HESTIA[j]), Nhalo_new)

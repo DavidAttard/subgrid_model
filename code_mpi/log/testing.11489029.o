@@ -1,0 +1,28 @@
+Memory usage before job starts:
+               total        used        free      shared  buff/cache   available
+Mem:           187Gi        10Gi       177Gi       2.6Gi       2.7Gi       176Gi
+Swap:             0B          0B          0B
+ rho_bar(Mpc^3/Msun)=   40606661905.6886     
+ rho_bar_cgs=  2.748174512287398E-030
+ rho_bar(Mpc^3/Msun)=   40606661905.6886     
+ rho_bar_cgs=  2.748174512287398E-030
+ rho_bar(Mpc^3/Msun)=   40606661905.6886     
+ rho_bar_cgs=  2.748174512287398E-030
+ rho_bar(Mpc^3/Msun)=   40606661905.6886     
+ rho_bar_cgs=  2.748174512287398E-030
+ Processing z=   20.13000    
+ Processing z=   23.26000    
+ doing z=   20.13000    
+ doing z=   23.26000    
+ Processing z=   21.06000    
+ doing z=   21.06000    
+ Processing z=   22.09000    
+ doing z=   22.09000    
+         512
+         512
+         512
+         512
+Memory usage after job finishes:
+               total        used        free      shared  buff/cache   available
+Mem:           187Gi        11Gi       176Gi       2.6Gi       2.7Gi       175Gi
+Swap:             0B          0B          0B
